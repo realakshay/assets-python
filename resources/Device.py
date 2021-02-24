@@ -37,3 +37,18 @@ class AvailableDeviceList(Resource):
     def get(cls):
         device_data = DeviceModel.find_available()
         return DeviceSchema(many=True).dump(device_data), 201
+
+class AssignDeviceToUser(Resource):
+
+    @classmethod
+    def put(cls, deviceId, userId):
+        device_data = DeviceModel.find_by_id(deviceId)
+        if device_data:
+            device_data.isAvailable = False
+            device_data.assignTo = userId
+            try:
+                device_data.insert_device()
+                return {"Message": "DEVICE ASSIGNED"}, 201
+            except:
+                return {"Message": "INTERNAL SERVER ERROR"}, 201
+        return {"MESSAGE": "INVALID REQUEST"}, 400

@@ -4,8 +4,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from dotenv import load_dotenv
-from resources.User import UserResource, UserLogin
-from resources.Device import DeviceInsert, DeviceList, AvailableDeviceList
+from resources.User import UserResource, UserLogin, UsersDevices
+from resources.Device import DeviceInsert, DeviceList, AvailableDeviceList, AssignDeviceToUser
 
 load_dotenv('.env')
 
@@ -32,6 +32,8 @@ api.add_resource(UserLogin, '/login')
 api.add_resource(DeviceInsert, '/device/insert')
 api.add_resource(DeviceList, '/devices')
 api.add_resource(AvailableDeviceList, '/device/available')
+api.add_resource(UsersDevices, '/mydevices/<int:id>')
+api.add_resource(AssignDeviceToUser, '/assign/<int:deviceId>/<int:userId>')
 
 if __name__ == "__main__":
     from db import db

@@ -3,6 +3,9 @@ from flask_restful import Resource
 from marshmallow import ValidationError
 from models.User import UserModel
 from schemas.User import UserSchema
+from models.Device import DeviceModel
+from schemas.Device import DeviceSchema
+
 
 class UserResource(Resource):
 
@@ -42,4 +45,12 @@ class UserLogin(Resource):
                 return { "Message": "LOGIN_SUCCESS"}, 201
             else :
                 return {"Message" : "INCORRECT_PASSWORD"}, 403
-        return {"Message" : "USER_NOT_REGISTER"}, 401
+        return {"Message" : "USER_NOT_REGISTER"}, 
+
+
+class UsersDevices(Resource):
+
+    @classmethod
+    def get(cls, id : int):
+        my_devices = DeviceModel.find_my_devices(id)
+        return DeviceSchema(many=True).dump(my_devices), 201

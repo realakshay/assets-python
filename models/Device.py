@@ -31,6 +31,9 @@ class DeviceModel(db.Model):
     def find_all(cls):
         return cls.query.all()
 
+    @classmethod
+    def find_my_devices(cls, id):
+        return cls.query.filter_by(assignTo=id).all()
 
     def insert_device(self):
         db.session.add(self)
