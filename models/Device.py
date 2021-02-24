@@ -8,7 +8,7 @@ class DeviceModel(db.Model):
     deviceName = db.Column(db.String(100), nullable=False)
     deviceType = db.Column(db.String(100), nullable=False)
     company = db.Column(db.String(100), nullable=False)
-    imei = db.Column(db.Integer)
+    imei = db.Column(db.BigInteger)
     osVersion = db.Column(db.String(100), nullable=False)
     os = db.Column(db.String(100), nullable=False)
     ram = db.Column(db.String(100), nullable=False)
