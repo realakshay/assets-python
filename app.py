@@ -5,7 +5,15 @@ from flask_restful import Api
 from flask_cors import CORS
 from dotenv import load_dotenv
 from resources.User import UserResource, UserLogin, UsersDevices
-from resources.Device import DeviceInsert, DeviceList, AvailableDeviceList, AssignDeviceToUser
+from resources.Device import (
+    DeviceInsert, 
+    DeviceList, 
+    AvailableDeviceList, 
+    AssignDeviceToUser,
+    DeallocateDevice,
+    ActivateDevice,
+    DeActivateDevice
+)
 
 load_dotenv('.env')
 
@@ -34,6 +42,9 @@ api.add_resource(DeviceList, '/devices')
 api.add_resource(AvailableDeviceList, '/device/available')
 api.add_resource(UsersDevices, '/mydevices/<int:id>')
 api.add_resource(AssignDeviceToUser, '/assign/<int:deviceId>/<int:userId>')
+api.add_resource(DeallocateDevice, '/deallocate/<int:deviceId>/<int:userId>')
+api.add_resource(ActivateDevice, '/activate/<int:deviceId>')
+api.add_resource(DeActivateDevice, '/deactivate/<int:deviceId>')
 
 if __name__ == "__main__":
     from db import db
