@@ -54,3 +54,11 @@ class UsersDevices(Resource):
     def get(cls, id : int):
         my_devices = DeviceModel.find_my_devices(id)
         return DeviceSchema(many=True).dump(my_devices), 201
+
+
+class AllUsers(Resource):
+
+    @classmethod
+    def get(cls):
+        user_data = UserModel.find_all()
+        return UserSchema(many=True, exclude=['password']).dump(user_data), 201

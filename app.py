@@ -4,7 +4,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from dotenv import load_dotenv
-from resources.User import UserResource, UserLogin, UsersDevices
+from resources.User import UserResource, UserLogin, UsersDevices, AllUsers
 from resources.Device import (
     DeviceInsert, 
     DeviceList, 
@@ -47,6 +47,7 @@ api.add_resource(DeallocateDevice, '/deallocate/<int:deviceId>/<int:userId>')
 api.add_resource(ActivateDevice, '/activate/<int:deviceId>')
 api.add_resource(DeActivateDevice, '/deactivate/<int:deviceId>')
 api.add_resource(SpecificDevice, '/getdevice/<int:deviceId>')
+api.add_resource(AllUsers, '/allusers')
 
 if __name__ == "__main__":
     from db import db

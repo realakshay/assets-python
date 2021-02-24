@@ -13,6 +13,10 @@ class UserModel(db.Model):
     @classmethod
     def find_by_username(cls, username):
         return cls.query.filter_by(username=username).first()
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
     
     def insert_user(self):
         db.session.add(self)
