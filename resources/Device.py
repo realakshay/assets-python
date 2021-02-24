@@ -44,11 +44,60 @@ class AssignDeviceToUser(Resource):
     def put(cls, deviceId, userId):
         device_data = DeviceModel.find_by_id(deviceId)
         if device_data:
-            device_data.isAvailable = False
-            device_data.assignTo = userId
+            if device_data.isActivated :
+                device_data.isAvailable = False
+                device_data.assignTo = userId
+                try:
+                    device_data.insert_device()
+                    return {"Message": "DEVICE ASSIGNED"}, 201
+                except:
+                    return {"Message": "INTERNAL SERVER ERROR"}, 401
+            return {"Message": "DEVICE IS NOT ACTIVATED TO ASSIGN"}, 400
+        return {"MESSAGE": "INVALID REQUEST"}, 400
+
+
+class DeallocateDevice(Resource):
+
+    @classmethod
+    def put(cls, deviceId, userId):
+        device_data = DeviceModel.find_by_id(deviceId)
+        if device_data:
+            device_data.isAvailable = True
+            device_data.assignTo = 0
             try:
                 device_data.insert_device()
-                return {"Message": "DEVICE ASSIGNED"}, 201
+                return {"Message": "DEVICE DE ALLOCATED"}, 201
             except:
-                return {"Message": "INTERNAL SERVER ERROR"}, 201
+                return {"Message": "INTERNAL SERVER ERROR"}, 401
+        return {"MESSAGE": "INVALID REQUEST"}, 400
+        
+
+
+class ActivateDevice(Resource):
+
+    @classmethod
+    def put(cls, deviceId):
+        device_data = DeviceModel.find_by_id(deviceId)
+        if device_data:
+            device_data.isActivated = True
+            try:
+                device_data.insert_device()
+                return {"Message": "DEVICE ACTIVATED"}, 201
+            except:
+                return {"Message": "INTERNAL SERVER ERROR"}, 401
+        return {"MESSAGE": "INVALID REQUEST"}, 400
+
+
+class DeActivateDevice(Resource):
+
+    @classmethod
+    def put(cls, deviceId):
+        device_data = DeviceModel.find_by_id(deviceId)
+        if device_data:
+            device_data.isActivated = False
+            try:
+                device_data.insert_device()
+                return {"Message": "DEVICE DE ACTIVATED"}, 201
+            except:
+                return {"Message": "INTERNAL SERVER ERROR"}, 401
         return {"MESSAGE": "INVALID REQUEST"}, 400
