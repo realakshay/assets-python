@@ -12,7 +12,8 @@ from resources.Device import (
     AssignDeviceToUser,
     DeallocateDevice,
     ActivateDevice,
-    DeActivateDevice
+    DeActivateDevice,
+    SpecificDevice
 )
 
 load_dotenv('.env')
@@ -45,6 +46,7 @@ api.add_resource(AssignDeviceToUser, '/assign/<int:deviceId>/<int:userId>')
 api.add_resource(DeallocateDevice, '/deallocate/<int:deviceId>/<int:userId>')
 api.add_resource(ActivateDevice, '/activate/<int:deviceId>')
 api.add_resource(DeActivateDevice, '/deactivate/<int:deviceId>')
+api.add_resource(SpecificDevice, '/getdevice/<int:deviceId>')
 
 if __name__ == "__main__":
     from db import db

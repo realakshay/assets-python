@@ -101,3 +101,11 @@ class DeActivateDevice(Resource):
             except:
                 return {"Message": "INTERNAL SERVER ERROR"}, 401
         return {"MESSAGE": "INVALID REQUEST"}, 400
+
+
+class SpecificDevice(Resource):
+
+    @classmethod
+    def get(cls, deviceId):
+        device_data = DeviceModel.find_by_id(deviceId)
+        return DeviceSchema().dump(device_data), 201
