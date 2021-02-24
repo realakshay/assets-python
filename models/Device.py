@@ -16,11 +16,16 @@ class DeviceModel(db.Model):
     isActivated = db.Column(db.Boolean, default=False)
     isAvailable = db.Column(db.Boolean, default=True)
     releaseDate = db.Column(db.String(100), nullable=False, default="01/01/2020")
+    assignTo = db.Column(db.Integer, default=0)
 
     
     @classmethod
     def find_by_id(cls, id: int) -> "DeviceModel":
         return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def find_available(cls):
+        return cls.query.filter_by(isAvailable=True).all()
 
     @classmethod
     def find_all(cls):

@@ -30,3 +30,10 @@ class DeviceList(Resource):
     def get(cls):
         device_data = DeviceModel.find_all()
         return DeviceSchema(many=True).dump(device_data), 201
+
+class AvailableDeviceList(Resource):
+
+    @classmethod
+    def get(cls):
+        device_data = DeviceModel.find_available()
+        return DeviceSchema(many=True).dump(device_data), 201

@@ -1,5 +1,6 @@
 from db import db
 
+
 class UserModel(db.Model):
     __tablename__ = "atos_users"
 
@@ -8,8 +9,6 @@ class UserModel(db.Model):
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     devices = db.Column(db.ARRAY(db.String), default=[])
-
-    
 
     @classmethod
     def find_by_username(cls, username):
