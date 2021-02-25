@@ -117,3 +117,17 @@ class AssignedDeviceList(Resource):
     def get(cls):
         assigned_devices = DeviceModel.find_assigned()
         return DeviceSchema(many=True).dump(assigned_devices), 201
+
+
+class DeviceUpdate(Resource):
+
+    @classmethod
+    def put(cls, deviceId):
+        json_data = request.get_json()
+        device_data = DeviceModel.find_by_id(deviceId)
+        if device_data:
+            device_data.osVersion = json_data['osVersion']
+            device_data.rom = json_data['rom']
+            device_data.insert_device()
+            return {"Message": "Device Updated Successfully"}, 201
+        return {"Message": "Internal server error"}, 401
