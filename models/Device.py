@@ -28,6 +28,10 @@ class DeviceModel(db.Model):
         return cls.query.filter_by(isAvailable=True).all()
 
     @classmethod
+    def find_assigned(cls):
+        return cls.query.filter(cls.assignTo != 0).all()
+
+    @classmethod
     def find_all(cls):
         return cls.query.all()
 

@@ -109,3 +109,11 @@ class SpecificDevice(Resource):
     def get(cls, deviceId):
         device_data = DeviceModel.find_by_id(deviceId)
         return DeviceSchema().dump(device_data), 201
+
+
+class AssignedDeviceList(Resource):
+
+    @classmethod
+    def get(cls):
+        assigned_devices = DeviceModel.find_assigned()
+        return DeviceSchema(many=True).dump(assigned_devices), 201
