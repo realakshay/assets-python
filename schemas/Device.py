@@ -17,4 +17,4 @@ class DeviceSchema(Schema):
     isActivated = fields.Bool()
     isAvailable = fields.Bool()
     releaseDate = fields.Str()
-    assignTo = fields.Int()
+    assignTo = fields.Str()

@@ -2,6 +2,7 @@ from flask import request, jsonify
 from flask_restful import Resource
 from marshmallow import ValidationError
 from models.Device import DeviceModel
+from models.User import UserModel
 from schemas.Device import DeviceSchema
 
 class DeviceInsert(Resource):
@@ -43,10 +44,11 @@ class AssignDeviceToUser(Resource):
     @classmethod
     def put(cls, deviceId, userId):
         device_data = DeviceModel.find_by_id(deviceId)
-        if device_data:
+        user_data = UserModel.find_by_id(userId)
+        if device_data and user_data:
             if device_data.isActivated :
                 device_data.isAvailable = False
-                device_data.assignTo = userId
+                device_data.assignTo = user_data.username
                 try:
                     device_data.insert_device()
                     return {"Message": "DEVICE ASSIGNED"}, 201

@@ -45,7 +45,7 @@ class UserLogin(Resource):
                 return { "Message": "LOGIN_SUCCESS"}, 201
             else :
                 return {"Message" : "INCORRECT_PASSWORD"}, 403
-        return {"Message" : "USER_NOT_REGISTER"}, 
+        return {"Message" : "USER_NOT_REGISTER"}, 401
 
 
 class UsersDevices(Resource):

@@ -16,7 +16,7 @@ class DeviceModel(db.Model):
     isActivated = db.Column(db.Boolean, default=False)
     isAvailable = db.Column(db.Boolean, default=True)
     releaseDate = db.Column(db.String(100), nullable=False, default="01/01/2020")
-    assignTo = db.Column(db.Integer, default=0)
+    assignTo = db.Column(db.String(100), default="0")
 
     
     @classmethod
@@ -29,7 +29,7 @@ class DeviceModel(db.Model):
 
     @classmethod
     def find_assigned(cls):
-        return cls.query.filter(cls.assignTo != 0).all()
+        return cls.query.filter(cls.assignTo != "0").all()
 
     @classmethod
     def find_all(cls):
@@ -37,7 +37,8 @@ class DeviceModel(db.Model):
 
     @classmethod
     def find_my_devices(cls, id):
-        return cls.query.filter_by(assignTo=id).all()
+        user_data = UserModel.find_by_id(id)
+        return cls.query.filter_by(assignTo=user_data.username).all()
 
     def insert_device(self):
         db.session.add(self)
