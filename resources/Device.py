@@ -65,7 +65,7 @@ class DeallocateDevice(Resource):
         device_data = DeviceModel.find_by_id(deviceId)
         if device_data:
             device_data.isAvailable = True
-            device_data.assignTo = 0
+            device_data.assignTo = "0"
             try:
                 device_data.insert_device()
                 return {"Message": "DEVICE DE ALLOCATED"}, 201
