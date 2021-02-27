@@ -96,7 +96,7 @@ class DeActivateDevice(Resource):
     def put(cls, deviceId):
         device_data = DeviceModel.find_by_id(deviceId)
         if device_data:
-            if device_data.assignTo != 0:
+            if device_data.assignTo != "0":
                 return {"Message": "DEVICE IS ASSIGNED TO SOMEONE"}, 401
             device_data.isActivated = False
             try:
