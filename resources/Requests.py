@@ -19,21 +19,23 @@ class RegisterRequest(Resource):
         device = DeviceModel.find_by_id(json_data["deviceId"])
 
         if user and device:
-            if device.status=="created" or device.status=="available":
-                try:
-                    request_data = request_schema.load(json_data)
-                except ValidationError as err:
-                    return err.messages, 401
+            if device.isActivated :
+                if device.status=="created" or device.status=="available":
+                    try:
+                        request_data = request_schema.load(json_data)
+                    except ValidationError as err:
+                        return err.messages, 401
 
-                try:
-                    request_model = RequestModel(**request_data)
-                    device.status = "blocked"
-                    request_model.insert_request()
-                    device.insert_device()
-                except:
-                    return {"Message" : "REQUEST INSERT ERROR"}, 401
-                return {"Message" : "REQUEST SUCCESSFULLY ADDED"}, 201
-            return {"Message" : "DEVICE IS NOT AVAILABLE"}, 401
+                    try:
+                        request_model = RequestModel(**request_data)
+                        device.status = "blocked"
+                        request_model.insert_request()
+                        device.insert_device()
+                    except:
+                        return {"Message" : "REQUEST INSERT ERROR"}, 401
+                    return {"Message" : "REQUEST SUCCESSFULLY ADDED"}, 201
+                return {"Message" : "DEVICE IS NOT AVAILABLE"}, 401
+            return {"Message" : "DEVICE IS NOT ACTIVATED"}, 401
         return {"Message" : "SOMETHING GETTING WRONG"}, 401
 
 
@@ -59,4 +61,22 @@ class ApproveRequest(Resource):
             request_data.insert_request()
             device_data.insert_device()
             return {"Message": "Request Approved"}, 201
+        return {"Message": "Request Not Found"}, 401
+
+
+class DeclineRequest(Resource):
+
+    @classmethod
+    def put(cls, reqId):
+        request_data = RequestModel.find_by_id(reqId)
+        device_data = DeviceModel.find_by_id(request_data.deviceId)
+        user_data = UserModel.find_by_id(request_data.userId)
+        if request_data:
+            request_data.reqStatus = "declined"
+            device_data.status = "available"
+            device_data.assignTo = "0"
+            request_data.insert_request()
+            device_data.insert_device()
+            # declined request
+            return {"Message": "Request Declined Successfully"}, 201
         return {"Message": "Request Not Found"}, 401

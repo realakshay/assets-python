@@ -13,9 +13,10 @@ class RequestModel(db.Model):
 
     # handle_by
     # handle_date
-
+    request_audit = db.relationship('RequestAuditModel', lazy='dynamic')
     device = db.relationship("DeviceModel")
     user = db.relationship("UserModel")
+    
 
 
     @classmethod
@@ -33,3 +34,7 @@ class RequestModel(db.Model):
     @classmethod
     def find_by_id(cls, reqId):
         return cls.query.filter_by(reqId=reqId).first()
+
+    @classmethod
+    def find_my_requests(cls, userId):
+        return cls.query.filter_by(userId=userId).all()

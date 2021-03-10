@@ -19,8 +19,8 @@ class UserResource(Resource):
             "password" : json_data["password"],
             "email" : json_data["email"],
             "role": json_data["role"],
-            "first_name": json_data["first_name"],
-            "last_name": json_data["last_name"]
+            "firstName": json_data["firstName"],
+            "lastName": json_data["lastName"]
         }
 
         try:

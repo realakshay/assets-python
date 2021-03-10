@@ -11,11 +11,12 @@ class UserModel(db.Model):
     # devices = db.Column(db.ARRAY(db.String), default=[])
     role = db.Column(db.String(100), nullable=False)
 
-    first_name = db.Column(db.String(200), nullable=False)
-    last_name = db.Column(db.String(200), nullable=False)
+    firstName = db.Column(db.String(200), nullable=False)
+    lastName = db.Column(db.String(200), nullable=False)
 
     isActivated = db.Column(db.Boolean, default=False)
     requests = db.relationship('RequestModel', lazy='dynamic')
+    request_audit = db.relationship('RequestAuditModel', lazy='dynamic')
 
     @classmethod
     def find_by_username(cls, username):

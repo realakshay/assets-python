@@ -46,16 +46,18 @@ class AssignDeviceToUser(Resource):
     def put(cls, deviceId, userId):
         device_data = DeviceModel.find_by_id(deviceId)
         user_data = UserModel.find_by_id(userId)
-        request_model = RequestModel({"deviceId": deviceId,"userId":userId})
+        req_obj = {"deviceId": deviceId,"userId":userId}
+        request_model = RequestModel(**req_obj)
         if device_data and user_data:
             if device_data.isActivated :
                 # device_data.isAvailable = False
-                if user_data.role == "admin":
-                    request_model.reqStatus = "approved"
+                # if user_data.role == "admin":
+                request_model.reqStatus = "approved"
                 device_data.status = "allocated"
                 device_data.assignTo = user_data.email
                 try:
                     device_data.insert_device()
+                    request_model.insert_request()
                     return {"Message": "DEVICE ASSIGNED"}, 201
                 except:
                     return {"Message": "INTERNAL SERVER ERROR"}, 401
@@ -110,7 +112,7 @@ class DeActivateDevice(Resource):
                 return {"Message": "DEVICE DE ACTIVATED"}, 201
             except:
                 return {"Message": "INTERNAL SERVER ERROR"}, 401
-        return {"MESSAGE": "INVALID REQUEST"}, 400
+        return {"MESSAGE": "INVALID REQUEST"}, 401
 
 
 class SpecificDevice(Resource):

@@ -21,8 +21,11 @@ from resources.Device import (
 from resources.Requests import (
     RegisterRequest, 
     AllPendingRequests,
-    ApproveRequest
+    ApproveRequest,
+    DeclineRequest
 )
+
+from resources.RequestAudit import AllRequsetAudits
 
 load_dotenv('.env')
 
@@ -65,6 +68,12 @@ api.add_resource(DeviceUpdate, '/update/device/<int:deviceId>')
 api.add_resource(RegisterRequest, "/insert/request")
 api.add_resource(AllPendingRequests, "/requests/pending")
 api.add_resource(ApproveRequest, "/request/approve/<int:reqId>")
+api.add_resource(DeclineRequest, "/request/decline/<int:reqId>")
+
+
+# Request Audits goes here
+api.add_resource(AllRequsetAudits, "/request/audits")
+
 
 if __name__ == "__main__":
     from db import db
