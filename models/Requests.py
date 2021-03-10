@@ -38,3 +38,7 @@ class RequestModel(db.Model):
     @classmethod
     def find_my_requests(cls, userId):
         return cls.query.filter_by(userId=userId).all()
+
+    @classmethod
+    def get_my_last_request(cls, deviceId, userId):
+        return cls.query.filter((cls.deviceId==deviceId)&(cls.userId==userId)).order_by(cls.reqId).first()

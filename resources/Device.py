@@ -4,6 +4,7 @@ from marshmallow import ValidationError
 from models.Device import DeviceModel
 from models.User import UserModel
 from models.Requests import RequestModel
+from models.RequestAudit import RequestAuditModel
 from schemas.Device import DeviceSchema
 
 class DeviceInsert(Resource):
@@ -44,23 +45,39 @@ class AssignDeviceToUser(Resource):
 
     @classmethod
     def put(cls, deviceId, userId):
+        
+        json_data = request.get_json()
+
         device_data = DeviceModel.find_by_id(deviceId)
         user_data = UserModel.find_by_id(userId)
         req_obj = {"deviceId": deviceId,"userId":userId}
         request_model = RequestModel(**req_obj)
+
         if device_data and user_data:
-            if device_data.isActivated :
-                # device_data.isAvailable = False
-                # if user_data.role == "admin":
-                request_model.reqStatus = "approved"
-                device_data.status = "allocated"
-                device_data.assignTo = user_data.email
-                try:
-                    device_data.insert_device()
-                    request_model.insert_request()
-                    return {"Message": "DEVICE ASSIGNED"}, 201
-                except:
-                    return {"Message": "INTERNAL SERVER ERROR"}, 401
+            if device_data.status == "created" or device_data.status == "available" :
+                if device_data.isActivated :
+                    # device_data.isAvailable = False
+                    # if user_data.role == "admin":
+                    request_model.reqStatus = "approved"
+                    device_data.status = "allocated"
+                    device_data.assignTo = user_data.email
+                    try:
+                        device_data.insert_device()
+                        request_model.insert_request()
+                        # return {"Message": "DEVICE ASSIGNED"}, 201
+                    except:
+                        return {"Message": "INTERNAL SERVER ERROR"}, 401
+
+                    req_model = RequestModel.get_my_last_request(deviceId, userId)
+                    req_audit_obj = {"reqId":req_model.reqId, "handleBy":json_data["admin_id"]}
+                    req_audit_model = RequestAuditModel(**req_audit_obj)
+
+                    try:
+                        req_audit_model.insert_request_audit()
+                        return {"Message": "DEVICE ASSIGNED"}, 201
+                    except:
+                        return {"Message": "INTERNAL SERVER ERROR"}, 403
+                return {"Message": "DEVICE ALREADY ASSIGNED TO USER"}, 403
             return {"Message": "DEVICE IS NOT ACTIVATED TO ASSIGN"}, 400
         return {"MESSAGE": "INVALID REQUEST"}, 400
 

@@ -3,9 +3,11 @@ from flask_restful import Resource
 from marshmallow import ValidationError
 from models.Requests import RequestModel
 from schemas.Requests import RequestSchema
+from schemas.RequestAudit import RequestAuditSchema
 
 from models.User import UserModel
 from models.Device import DeviceModel
+from models.RequestAudit import RequestAuditModel
 
 request_schema = RequestSchema()
 requests_schema = RequestSchema(many=True)
@@ -51,15 +53,23 @@ class ApproveRequest(Resource):
 
     @classmethod
     def put(cls, reqId):
+
+        json_data = request.get_json()
+
         request_data = RequestModel.find_by_id(reqId)
         device_data = DeviceModel.find_by_id(request_data.deviceId)
         user_data = UserModel.find_by_id(request_data.userId)
+
+        req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+        req_audit_model = RequestAuditModel(**req_audit_obj)
+
         if request_data:
             request_data.reqStatus = "approved"
             device_data.status = "allocated"
             device_data.assignTo = user_data.email
             request_data.insert_request()
             device_data.insert_device()
+            req_audit_model.insert_request_audit()
             return {"Message": "Request Approved"}, 201
         return {"Message": "Request Not Found"}, 401
 
@@ -68,15 +78,24 @@ class DeclineRequest(Resource):
 
     @classmethod
     def put(cls, reqId):
+
+        json_data = request.get_json()
+
+
         request_data = RequestModel.find_by_id(reqId)
         device_data = DeviceModel.find_by_id(request_data.deviceId)
         user_data = UserModel.find_by_id(request_data.userId)
+
+        req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+        req_audit_model = RequestAuditModel(**req_audit_obj)
+
         if request_data:
             request_data.reqStatus = "declined"
             device_data.status = "available"
             device_data.assignTo = "0"
             request_data.insert_request()
             device_data.insert_device()
+            req_audit_model.insert_request_audit()
             # declined request
             return {"Message": "Request Declined Successfully"}, 201
         return {"Message": "Request Not Found"}, 401
