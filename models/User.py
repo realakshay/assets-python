@@ -8,7 +8,14 @@ class UserModel(db.Model):
     username = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    devices = db.Column(db.ARRAY(db.String), default=[])
+    # devices = db.Column(db.ARRAY(db.String), default=[])
+    role = db.Column(db.String(100), nullable=False)
+
+    first_name = db.Column(db.String(200), nullable=False)
+    last_name = db.Column(db.String(200), nullable=False)
+
+    isActivated = db.Column(db.Boolean, default=False)
+    requests = db.relationship('RequestModel', lazy='dynamic')
 
     @classmethod
     def find_by_username(cls, username):

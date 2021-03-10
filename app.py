@@ -18,6 +18,12 @@ from resources.Device import (
     DeviceUpdate
 )
 
+from resources.Requests import (
+    RegisterRequest, 
+    AllPendingRequests,
+    ApproveRequest
+)
+
 load_dotenv('.env')
 
 app = Flask(__name__)
@@ -52,6 +58,13 @@ api.add_resource(SpecificDevice, '/getdevice/<int:deviceId>')
 api.add_resource(AllUsers, '/allusers')
 api.add_resource(AssignedDeviceList, '/all/assigned')
 api.add_resource(DeviceUpdate, '/update/device/<int:deviceId>')
+
+
+# Request Session will goes here
+
+api.add_resource(RegisterRequest, "/insert/request")
+api.add_resource(AllPendingRequests, "/requests/pending")
+api.add_resource(ApproveRequest, "/request/approve/<int:reqId>")
 
 if __name__ == "__main__":
     from db import db

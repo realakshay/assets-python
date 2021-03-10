@@ -3,6 +3,7 @@ from flask_restful import Resource
 from marshmallow import ValidationError
 from models.Device import DeviceModel
 from models.User import UserModel
+from models.Requests import RequestModel
 from schemas.Device import DeviceSchema
 
 class DeviceInsert(Resource):
@@ -45,10 +46,14 @@ class AssignDeviceToUser(Resource):
     def put(cls, deviceId, userId):
         device_data = DeviceModel.find_by_id(deviceId)
         user_data = UserModel.find_by_id(userId)
+        request_model = RequestModel({"deviceId": deviceId,"userId":userId})
         if device_data and user_data:
             if device_data.isActivated :
-                device_data.isAvailable = False
-                device_data.assignTo = user_data.username
+                # device_data.isAvailable = False
+                if user_data.role == "admin":
+                    request_model.reqStatus = "approved"
+                device_data.status = "allocated"
+                device_data.assignTo = user_data.email
                 try:
                     device_data.insert_device()
                     return {"Message": "DEVICE ASSIGNED"}, 201
@@ -64,7 +69,8 @@ class DeallocateDevice(Resource):
     def put(cls, deviceId, userId):
         device_data = DeviceModel.find_by_id(deviceId)
         if device_data:
-            device_data.isAvailable = True
+            # device_data.isAvailable = True
+            device_data.status = "available"
             device_data.assignTo = "0"
             try:
                 device_data.insert_device()

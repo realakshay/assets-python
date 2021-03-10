@@ -14,18 +14,26 @@ class DeviceModel(db.Model):
     ram = db.Column(db.String(100), nullable=False)
     rom = db.Column(db.String(100), nullable=False)
     isActivated = db.Column(db.Boolean, default=False)
-    isAvailable = db.Column(db.Boolean, default=True)
+    # isAvailable = db.Column(db.Boolean, default=True)
     releaseDate = db.Column(db.String(100), nullable=False, default="01/01/2020")
     assignTo = db.Column(db.String(100), default="0")
 
+    # status could be created, allocated, available, blocked
+    status = db.Column(db.String(100), default="created")
+
+    requests=db.relationship('RequestModel',lazy='dynamic')
     
     @classmethod
     def find_by_id(cls, id: int) -> "DeviceModel":
         return cls.query.filter_by(id=id).first()
 
+    # @classmethod
+    # def find_available(cls):
+    #     return cls.query.filter_by(isAvailable=True).all()
+
     @classmethod
     def find_available(cls):
-        return cls.query.filter_by(isAvailable=True).all()
+        return cls.query.filter((cls.status=="created")|(cls.status=="available")).all()
 
     @classmethod
     def find_assigned(cls):
@@ -38,7 +46,7 @@ class DeviceModel(db.Model):
     @classmethod
     def find_my_devices(cls, id):
         user_data = UserModel.find_by_id(id)
-        return cls.query.filter_by(assignTo=user_data.username).all()
+        return cls.query.filter_by(assignTo=user_data.email).all()
 
     def insert_device(self):
         db.session.add(self)

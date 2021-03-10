@@ -8,4 +8,9 @@ class UserSchema(Schema):
     username = fields.Str()
     password = fields.Str()
     email = fields.Str()
-    devices = fields.List(fields.Str())
+    # devices = fields.List(fields.Str())
+    first_name = fields.Str()
+    last_name = fields.Str()
+    role = fields.Str()
+
+    isActivated = fields.Bool()

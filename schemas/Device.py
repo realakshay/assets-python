@@ -15,6 +15,7 @@ class DeviceSchema(Schema):
     ram = fields.Str()
     rom = fields.Str()
     isActivated = fields.Bool()
-    isAvailable = fields.Bool()
+    # isAvailable = fields.Bool()
     releaseDate = fields.Str()
     assignTo = fields.Str()
+    status = fields.Str()

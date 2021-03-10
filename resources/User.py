@@ -17,9 +17,12 @@ class UserResource(Resource):
         personal_info = {
             "username" : json_data["username"],
             "password" : json_data["password"],
-            "email" : json_data["email"]
+            "email" : json_data["email"],
+            "role": json_data["role"],
+            "first_name": json_data["first_name"],
+            "last_name": json_data["last_name"]
         }
-        print(personal_info)
+
         try:
             user_data = UserSchema().load(personal_info)
             print(user_data)
@@ -28,7 +31,11 @@ class UserResource(Resource):
 
         try:
             user_model = UserModel(**user_data)
-            user_model.insert_user()
+            if user_model.role=="admin":
+                user_model.isActivated = True
+                user_model.insert_user()
+            else:
+                user_model.insert_user()
         except:
             return {"Message" : "USER_INSERTION_ERROR"}, 401
         return {"Message" : "USER_REGISTRATION_SUCCESSFUL"}, 201
@@ -42,7 +49,7 @@ class UserLogin(Resource):
         data = UserModel.find_by_username(json_data['username'])
         if data :
             if data.password == json_data['password']:
-                return { "Message": "LOGIN_SUCCESS"}, 201
+                return { "Message": "LOGIN_SUCCESS", "role": data.role}, 201
             else :
                 return {"Message" : "INCORRECT_PASSWORD"}, 403
         return {"Message" : "USER_NOT_REGISTER"}, 401
