@@ -4,7 +4,14 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from dotenv import load_dotenv
-from resources.User import UserResource, UserLogin, UsersDevices, AllUsers
+from resources.User import (
+    UserResource, 
+    UserLogin, 
+    UsersDevices, 
+    AllUsers,
+    ActivateUser,
+    DeActivateUser
+)
 from resources.Device import (
     DeviceInsert, 
     DeviceList, 
@@ -22,7 +29,8 @@ from resources.Requests import (
     RegisterRequest, 
     AllPendingRequests,
     ApproveRequest,
-    DeclineRequest
+    DeclineRequest,
+    AllMyRequests
 )
 
 from resources.RequestAudit import AllRequsetAudits
@@ -71,6 +79,7 @@ api.add_resource(RegisterRequest, "/insert/request")
 api.add_resource(AllPendingRequests, "/requests/pending")
 api.add_resource(ApproveRequest, "/request/approve/<int:reqId>")
 api.add_resource(DeclineRequest, "/request/decline/<int:reqId>")
+api.add_resource(AllMyRequests, "/myrequests/<int:userId>")
 
 
 # Request Audits goes here
@@ -78,6 +87,11 @@ api.add_resource(AllRequsetAudits, "/request/audits")
 
 # Device Audit goes here
 api.add_resource(AllDeviceAudits, "/device/audits")
+
+#Activate user Deactivate user
+api.add_resource(ActivateUser, "/user/activate/<int:userId>")
+api.add_resource(DeActivateUser, "/user/deactivate/<int:userId>")
+
 
 if __name__ == "__main__":
     from db import db

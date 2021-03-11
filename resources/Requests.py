@@ -108,3 +108,11 @@ class DeclineRequest(Resource):
             # declined request
             return {"Message": "Request Declined Successfully"}, 201
         return {"Message": "Request Not Found"}, 401
+
+
+class AllMyRequests(Resource):
+
+    @classmethod
+    def get(cls, userId):
+        my_requests = RequestModel.find_my_requests(userId)
+        return requests_schema.dump(my_requests), 201

@@ -69,3 +69,51 @@ class AllUsers(Resource):
     def get(cls):
         user_data = UserModel.find_all()
         return UserSchema(many=True, exclude=['password']).dump(user_data), 201
+
+
+class ActivateUser(Resource):
+
+    @classmethod
+    def post(cls, userId):
+        json_data = request.get_json()
+
+        user_data = UserModel.find_by_id(userId)
+        admin_data = UserModel.find_by_id(json_data['admin_id'])
+
+        if user_data:
+            if admin_data:
+                if admin_data.role=="admin":
+                    if not user_data.isActivated:
+                        user_data.isActivated = True
+                        user_data.insert_user()
+                        return {"Message": "User is Activated"}, 201
+                    return {"Message": "User is Already Activated"}, 201
+                return {"Message": "You dont have an access to activate other user"}, 401
+            return {"Message": "Admin Not Found"}, 401
+        return {"Message": "User Not Found"}, 401
+
+
+class DeActivateUser(Resource):
+
+    @classmethod
+    def post(cls, userId):
+        json_data = request.get_json()
+
+        user_data = UserModel.find_by_id(userId)
+        admin_data = UserModel.find_by_id(json_data['admin_id'])
+        user_devices = DeviceModel.find_my_devices(userId)
+        type(user_devices)
+        print(len(user_devices))
+        if user_data:
+            if len(user_devices)==0:
+                if admin_data:
+                    if admin_data.role=="admin":
+                        if user_data.isActivated:
+                            user_data.isActivated = False
+                            user_data.insert_user()
+                            return {"Message": "User is DeActivated"}, 201
+                        return {"Message": "User is Already DeActivated"},401
+                    return {"Message": "You dont have an access to deactivate other user"}, 401
+                return {"Message": "Admin Not Found"}, 401
+            return {"Message": "User has some devices so you cannot deactivate him"}, 401
+        return {"Message": "User Not Found"}, 401

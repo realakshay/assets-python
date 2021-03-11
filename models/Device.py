@@ -44,8 +44,8 @@ class DeviceModel(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find_my_devices(cls, id):
-        user_data = UserModel.find_by_id(id)
+    def find_my_devices(cls, userId):
+        user_data = UserModel.find_by_id(userId)
         return cls.query.filter_by(assignTo=user_data.email).all()
 
     def insert_device(self):
