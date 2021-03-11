@@ -8,6 +8,7 @@ from schemas.RequestAudit import RequestAuditSchema
 from models.User import UserModel
 from models.Device import DeviceModel
 from models.RequestAudit import RequestAuditModel
+from models.DeviceAudit import DeviceAuditModel
 
 request_schema = RequestSchema()
 requests_schema = RequestSchema(many=True)
@@ -63,6 +64,13 @@ class ApproveRequest(Resource):
         req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
         req_audit_model = RequestAuditModel(**req_audit_obj)
 
+        device_obj = {
+            "deviceId": request_data.deviceId,
+            "userId": request_data.userId, 
+            "allocateBy": json_data["admin_id"]
+        }
+        device_audit_model = DeviceAuditModel(**device_obj)
+
         if request_data:
             request_data.reqStatus = "approved"
             device_data.status = "allocated"
@@ -70,6 +78,7 @@ class ApproveRequest(Resource):
             request_data.insert_request()
             device_data.insert_device()
             req_audit_model.insert_request_audit()
+            device_audit_model.insert_device_audit()
             return {"Message": "Request Approved"}, 201
         return {"Message": "Request Not Found"}, 401
 

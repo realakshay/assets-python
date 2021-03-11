@@ -27,6 +27,8 @@ from resources.Requests import (
 
 from resources.RequestAudit import AllRequsetAudits
 
+from resources.DeviceAudit import AllDeviceAudits
+
 load_dotenv('.env')
 
 app = Flask(__name__)
@@ -74,6 +76,8 @@ api.add_resource(DeclineRequest, "/request/decline/<int:reqId>")
 # Request Audits goes here
 api.add_resource(AllRequsetAudits, "/request/audits")
 
+# Device Audit goes here
+api.add_resource(AllDeviceAudits, "/device/audits")
 
 if __name__ == "__main__":
     from db import db
