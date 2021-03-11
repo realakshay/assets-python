@@ -70,6 +70,7 @@ class AssignDeviceToUser(Resource):
                     request_model.reqStatus = "approved"
                     device_data.status = "allocated"
                     device_data.assignTo = user_data.email
+                    device_data.releaseDate = json_data["releaseDate"]
                     try:
                         device_data.insert_device()
                         request_model.insert_request()

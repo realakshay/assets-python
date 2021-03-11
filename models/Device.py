@@ -15,7 +15,7 @@ class DeviceModel(db.Model):
     rom = db.Column(db.String(100), nullable=False)
     isActivated = db.Column(db.Boolean, default=False)
     # isAvailable = db.Column(db.Boolean, default=True)
-    releaseDate = db.Column(db.String(100), nullable=False, default="01/01/2020")
+    releaseDate = db.Column(db.Date, default=None)
     assignTo = db.Column(db.String(100), default="0")
 
     # status could be created, allocated, available, blocked
