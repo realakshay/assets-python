@@ -59,36 +59,40 @@ class AssignDeviceToUser(Resource):
         device_obj = {"deviceId": deviceId,"userId":userId, "allocateBy": json_data["admin_id"]}
         device_audit_model = DeviceAuditModel(**device_obj)
 
+        admin_data = UserModel.find_by_id(json_data['admin_id'])
 
-        if device_data and user_data:
+        if device_data and user_data and admin_data.role=="admin":
             # if device_data.status == "created" or device_data.status == "available" :
-            if device_data.isActivated :
-                # device_data.isAvailable = False
-                # if user_data.role == "admin":
-                request_model.reqStatus = "approved"
-                device_data.status = "allocated"
-                device_data.assignTo = user_data.email
-                try:
-                    device_data.insert_device()
-                    request_model.insert_request()
-                    # return {"Message": "DEVICE ASSIGNED"}, 201
-                except:
-                    return {"Message": "INTERNAL SERVER ERROR"}, 401
+            if user_data.isActivated:
+                if device_data.isActivated :
+                    # device_data.isAvailable = False
+                    # if user_data.role == "admin":
+                    request_model.reqStatus = "approved"
+                    device_data.status = "allocated"
+                    device_data.assignTo = user_data.email
+                    try:
+                        device_data.insert_device()
+                        request_model.insert_request()
+                        # return {"Message": "DEVICE ASSIGNED"}, 201
+                    except:
+                        return {"Message": "INTERNAL SERVER ERROR"}, 401
 
-                req_model = RequestModel.get_my_last_request(deviceId, userId)
-                req_audit_obj = {"reqId":req_model.reqId, "handleBy":json_data["admin_id"]}
-                req_audit_model = RequestAuditModel(**req_audit_obj)
+                    req_model = RequestModel.get_my_last_request(deviceId, userId)
+                    req_audit_obj = {"reqId":req_model.reqId, "handleBy":json_data["admin_id"]}
+                    req_audit_model = RequestAuditModel(**req_audit_obj)
 
-                try:
-                    req_audit_model.insert_request_audit()
+                    try:
+                        req_audit_model.insert_request_audit()
+                        device_audit_model.insert_device_audit()
+                        return {"Message": "DEVICE ASSIGNED"}, 201
+                        
+                    except:
+                        return {"Message": "INTERNAL SERVER ERROR"}, 403
+
                     
-                except:
-                    return {"Message": "INTERNAL SERVER ERROR"}, 403
-
-                device_audit_model.insert_device_audit()
-                return {"Message": "DEVICE ASSIGNED"}, 201
-            # return {"Message": "DEVICE ALREADY ASSIGNED TO USER"}, 403
-            return {"Message": "DEVICE IS NOT ACTIVATED TO ASSIGN"}, 400
+                # return {"Message": "DEVICE ALREADY ASSIGNED TO USER"}, 403
+                return {"Message": "DEVICE IS NOT ACTIVATED TO ASSIGN"}, 400
+            return {"Message": "USER IS NOT ACTIVATED TO ASSIGN"}, 400
         return {"MESSAGE": "INVALID REQUEST"}, 400
 
 

@@ -7,6 +7,7 @@ class RequestAuditSchema(Schema):
     class Meta:
         model = RequestAuditModel
 
+    id = fields.Int(dump_only=True)
     reqId = fields.Int(dump_only=True)
     handleBy = fields.Int()
     handleDate = fields.DateTime(dump_only=True)

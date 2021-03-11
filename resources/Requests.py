@@ -21,25 +21,31 @@ class RegisterRequest(Resource):
         user = UserModel.find_by_id(json_data["userId"])
         device = DeviceModel.find_by_id(json_data["deviceId"])
 
-        if user and device:
-            if device.isActivated :
-                if device.status=="created" or device.status=="available":
-                    try:
-                        request_data = request_schema.load(json_data)
-                    except ValidationError as err:
-                        return err.messages, 401
+        print(json_data["releaseDate"])
 
-                    try:
-                        request_model = RequestModel(**request_data)
-                        device.status = "blocked"
-                        request_model.insert_request()
-                        device.insert_device()
-                    except:
-                        return {"Message" : "REQUEST INSERT ERROR"}, 401
-                    return {"Message" : "REQUEST SUCCESSFULLY ADDED"}, 201
-                return {"Message" : "DEVICE IS NOT AVAILABLE"}, 401
-            return {"Message" : "DEVICE IS NOT ACTIVATED"}, 401
-        return {"Message" : "SOMETHING GETTING WRONG"}, 401
+        if device.status=="available" or device.status=="created":
+            if user and device:
+                if device.isActivated :
+                    if device.status=="created" or device.status=="available":
+                        try:
+                            req_obj = {"deviceId" : json_data["deviceId"], "userId" : json_data["userId"]}
+                            request_data = request_schema.load(req_obj)
+                        except ValidationError as err:
+                            return err.messages, 401
+
+                        try:
+                            request_model = RequestModel(**request_data)
+                            device.status = "blocked"
+                            device.releaseDate = json_data["releaseDate"]
+                            request_model.insert_request()
+                            device.insert_device()
+                        except:
+                            return {"Message" : "REQUEST INSERT ERROR"}, 401
+                        return {"Message" : "REQUEST SUCCESSFULLY ADDED"}, 201
+                    return {"Message" : "DEVICE IS NOT AVAILABLE"}, 401
+                return {"Message" : "DEVICE IS NOT ACTIVATED"}, 401
+            return {"Message" : "SOMETHING GETTING WRONG"}, 401
+        return {"Messgae": "Device is not available to request"}, 401
 
 
 class AllPendingRequests(Resource):
@@ -59,28 +65,32 @@ class ApproveRequest(Resource):
 
         request_data = RequestModel.find_by_id(reqId)
         device_data = DeviceModel.find_by_id(request_data.deviceId)
-        user_data = UserModel.find_by_id(request_data.userId)
 
-        req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
-        req_audit_model = RequestAuditModel(**req_audit_obj)
+        if device_data.status=="blocked":
+            user_data = UserModel.find_by_id(request_data.userId)
+            req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+            req_audit_model = RequestAuditModel(**req_audit_obj)
 
-        device_obj = {
-            "deviceId": request_data.deviceId,
-            "userId": request_data.userId, 
-            "allocateBy": json_data["admin_id"]
-        }
-        device_audit_model = DeviceAuditModel(**device_obj)
+            device_obj = {
+                "deviceId": request_data.deviceId,
+                "userId": request_data.userId, 
+                "allocateBy": json_data["admin_id"]
+            }
+            device_audit_model = DeviceAuditModel(**device_obj)
 
-        if request_data:
-            request_data.reqStatus = "approved"
-            device_data.status = "allocated"
-            device_data.assignTo = user_data.email
-            request_data.insert_request()
-            device_data.insert_device()
-            req_audit_model.insert_request_audit()
-            device_audit_model.insert_device_audit()
-            return {"Message": "Request Approved"}, 201
-        return {"Message": "Request Not Found"}, 401
+            admin_data = UserModel.find_by_id(json_data['admin_id'])
+            
+            if request_data and admin_data.role=="admin":
+                request_data.reqStatus = "approved"
+                device_data.status = "allocated"
+                device_data.assignTo = user_data.email
+                request_data.insert_request()
+                device_data.insert_device()
+                req_audit_model.insert_request_audit()
+                device_audit_model.insert_device_audit()
+                return {"Message": "Request Approved"}, 201
+            return {"Message": "Request Not Found"}, 401
+        return {"Message": "Device is not requested"}, 401
 
 
 class DeclineRequest(Resource):
@@ -90,7 +100,6 @@ class DeclineRequest(Resource):
 
         json_data = request.get_json()
 
-
         request_data = RequestModel.find_by_id(reqId)
         device_data = DeviceModel.find_by_id(request_data.deviceId)
         user_data = UserModel.find_by_id(request_data.userId)
@@ -98,10 +107,13 @@ class DeclineRequest(Resource):
         req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
         req_audit_model = RequestAuditModel(**req_audit_obj)
 
-        if request_data:
+        admin_data = UserModel.find_by_id(json_data['admin_id'])
+
+        if request_data and admin_data.role=="admin":
             request_data.reqStatus = "declined"
             device_data.status = "available"
             device_data.assignTo = "0"
+            device_data.releaseDate = None
             request_data.insert_request()
             device_data.insert_device()
             req_audit_model.insert_request_audit()
