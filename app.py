@@ -10,7 +10,8 @@ from resources.User import (
     UsersDevices, 
     AllUsers,
     ActivateUser,
-    DeActivateUser
+    DeActivateUser,
+    AllActivatedUsers
 )
 from resources.Device import (
     DeviceInsert, 
@@ -57,8 +58,7 @@ def create_tables():
 def method_name():
     return "<h1>App is running now</h1>"
 
-api.add_resource(UserResource, '/register')
-api.add_resource(UserLogin, '/login')
+
 api.add_resource(DeviceInsert, '/device/insert')
 api.add_resource(DeviceList, '/devices')
 api.add_resource(AvailableDeviceList, '/device/available')
@@ -68,7 +68,6 @@ api.add_resource(DeallocateDevice, '/deallocate/<int:deviceId>/<string:userId>')
 api.add_resource(ActivateDevice, '/activate/<int:deviceId>')
 api.add_resource(DeActivateDevice, '/deactivate/<int:deviceId>')
 api.add_resource(SpecificDevice, '/getdevice/<int:deviceId>')
-api.add_resource(AllUsers, '/allusers')
 api.add_resource(AssignedDeviceList, '/all/assigned')
 api.add_resource(DeviceUpdate, '/update/device/<int:deviceId>')
 
@@ -88,10 +87,13 @@ api.add_resource(AllRequsetAudits, "/request/audits")
 # Device Audit goes here
 api.add_resource(AllDeviceAudits, "/device/audits")
 
-#Activate user Deactivate user
+# user requests
 api.add_resource(ActivateUser, "/user/activate/<int:userId>")
 api.add_resource(DeActivateUser, "/user/deactivate/<int:userId>")
-
+api.add_resource(AllActivatedUsers, "/users/activated")
+api.add_resource(UserResource, '/register')
+api.add_resource(UserLogin, '/login')
+api.add_resource(AllUsers, '/allusers')
 
 if __name__ == "__main__":
     from db import db

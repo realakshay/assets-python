@@ -30,7 +30,9 @@ class UserModel(db.Model):
     def find_all(cls):
         return cls.query.all()
 
-    
+    @classmethod
+    def find_all_activated(cls):
+        return cls.query.filter_by(isActivated=True).all()
     
     def insert_user(self):
         db.session.add(self)

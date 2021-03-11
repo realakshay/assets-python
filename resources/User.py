@@ -48,10 +48,12 @@ class UserLogin(Resource):
         json_data = request.get_json()
         data = UserModel.find_by_username(json_data['username'])
         if data :
-            if data.password == json_data['password']:
-                return { "Message": "LOGIN_SUCCESS", "role": data.role}, 201
-            else :
-                return {"Message" : "INCORRECT_PASSWORD"}, 403
+            if data.isActivated:
+                if data.password == json_data['password']:
+                    return { "Message": "LOGIN_SUCCESS", "role": data.role}, 201
+                else :
+                    return {"Message" : "INCORRECT_PASSWORD"}, 403
+            return {"Message" : "USER_NOT_ACTIVATED_YET"}, 401
         return {"Message" : "USER_NOT_REGISTER"}, 401
 
 
@@ -70,6 +72,13 @@ class AllUsers(Resource):
         user_data = UserModel.find_all()
         return UserSchema(many=True, exclude=['password']).dump(user_data), 201
 
+
+class AllActivatedUsers(Resource):
+
+    @classmethod
+    def get(cls):
+        activated_user_data = UserModel.find_all_activated()
+        return UserSchema(many=True, exclude=['password']).dump(activated_user_data), 201
 
 class ActivateUser(Resource):
 
