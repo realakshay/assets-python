@@ -11,7 +11,8 @@ from resources.User import (
     AllUsers,
     ActivateUser,
     DeActivateUser,
-    AllActivatedUsers
+    AllActivatedUsers,
+    EditUser
 )
 from resources.Device import (
     DeviceInsert, 
@@ -94,6 +95,7 @@ api.add_resource(AllActivatedUsers, "/users/activated")
 api.add_resource(UserResource, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(AllUsers, '/allusers')
+api.add_resource(EditUser, "/user/edit/<int:userId>")
 
 if __name__ == "__main__":
     from db import db

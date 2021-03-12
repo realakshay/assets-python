@@ -130,3 +130,18 @@ class DeActivateUser(Resource):
                 return {"Message": "Admin Not Found"}, 401
             return {"Message": "User has some devices so you cannot deactivate him"}, 401
         return {"Message": "User Not Found"}, 401
+
+
+class EditUser(Resource):
+
+    @classmethod
+    def put(cls, userId):
+        json_data = request.get_json()
+        user_data = UserModel.find_by_id(userId)
+        if user_data:
+            user_data.firstName = json_data['firstName']
+            user_data.lastName = json_data['lastName']
+            user_data.role = json_data['role']
+            user_data.insert_user()
+            return {"Message": "User Update Successful"}, 201
+        return {"Message": "User Not Found"}, 401
