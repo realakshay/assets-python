@@ -54,7 +54,7 @@ class UserLogin(Resource):
         if data :
             if data.isActivated:
                 if data.password == json_data['password']:
-                    return { "Message": "LOGIN_SUCCESS", "role": data.role, "id":data.id}, 201
+                    return { "Message": "LOGIN_SUCCESS", "role": data.role, "id":data.id, "firstName": data.firstName}, 201
                 else :
                     return {"Message" : "INCORRECT_PASSWORD"}, 403
             return {"Message" : "USER_NOT_ACTIVATED_YET"}, 401
