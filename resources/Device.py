@@ -100,10 +100,11 @@ class AssignDeviceToUser(Resource):
 class DeallocateDevice(Resource):
 
     @classmethod
-    def put(cls, deviceId, userId):
+    def put(cls, deviceId):
         json_data = request.get_json()
         device_data = DeviceModel.find_by_id(deviceId)
-        device_audit = DeviceAuditModel.find_my_device(deviceId, userId)
+        user_data = UserModel.find_by_email(device_data.assignTo)
+        device_audit = DeviceAuditModel.find_my_device(deviceId, user_data.id)
         if device_data and device_audit:
             # device_data.isAvailable = True
             device_data.status = "available"
