@@ -14,17 +14,21 @@ class UserResource(Resource):
         json_data = request.get_json()
         print(type(json_data))
 
-        personal_info = {
-            "username" : json_data["username"],
-            "password" : json_data["password"],
-            "email" : json_data["email"],
-            "role": json_data["role"],
-            "firstName": json_data["firstName"],
-            "lastName": json_data["lastName"]
-        }
+        user = UserModel.find_by_email(json_data['email'])
+        if user:
+            return {"Message": "User with this email is already register"}, 401
+            
+        # personal_info = {
+        #     "username" : json_data["username"],
+        #     "password" : json_data["password"],
+        #     "email" : json_data["email"],
+        #     "role": json_data["role"],
+        #     "firstName": json_data["firstName"],
+        #     "lastName": json_data["lastName"]
+        # }
 
         try:
-            user_data = UserSchema().load(personal_info)
+            user_data = UserSchema().load(json_data)
             print(user_data)
         except ValidationError as err:
             return err.messages, 401
@@ -50,7 +54,7 @@ class UserLogin(Resource):
         if data :
             if data.isActivated:
                 if data.password == json_data['password']:
-                    return { "Message": "LOGIN_SUCCESS", "role": data.role}, 201
+                    return { "Message": "LOGIN_SUCCESS", "role": data.role, "id":data.id}, 201
                 else :
                     return {"Message" : "INCORRECT_PASSWORD"}, 403
             return {"Message" : "USER_NOT_ACTIVATED_YET"}, 401

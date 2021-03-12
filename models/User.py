@@ -41,3 +41,7 @@ class UserModel(db.Model):
     def delete_user(self):
         db.session.delete(self)
         db.session.commit()
+
+    @classmethod
+    def find_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
