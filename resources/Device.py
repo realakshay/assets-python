@@ -77,7 +77,7 @@ class AssignDeviceToUser(Resource):
                     try:
                         device_data.insert_device()
                         request_model.insert_request()
-                        return {"Message": "DEVICE ASSIGNED"}, 201
+                        # return {"Message": "DEVICE ASSIGNED"}, 201
                     except:
                         return {"Message": "INTERNAL SERVER ERROR"}, 401
 
