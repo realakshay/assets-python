@@ -66,31 +66,34 @@ class ApproveRequest(Resource):
         request_data = RequestModel.find_by_id(reqId)
         device_data = DeviceModel.find_by_id(request_data.deviceId)
 
-        if device_data.status=="blocked":
-            user_data = UserModel.find_by_id(request_data.userId)
-            req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
-            req_audit_model = RequestAuditModel(**req_audit_obj)
+        if request_data.reqStatus == "pending":
+            if device_data.status=="blocked":
+                user_data = UserModel.find_by_id(request_data.userId)
+                req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+                req_audit_model = RequestAuditModel(**req_audit_obj)
 
-            device_obj = {
-                "deviceId": request_data.deviceId,
-                "userId": request_data.userId, 
-                "allocateBy": json_data["admin_id"]
-            }
-            device_audit_model = DeviceAuditModel(**device_obj)
+                device_obj = {
+                    "deviceId": request_data.deviceId,
+                    "userId": request_data.userId, 
+                    "allocateBy": json_data["admin_id"]
+                }
+                device_audit_model = DeviceAuditModel(**device_obj)
 
-            admin_data = UserModel.find_by_id(json_data['admin_id'])
-            
-            if request_data and admin_data.role=="admin":
-                request_data.reqStatus = "approved"
-                device_data.status = "allocated"
-                device_data.assignTo = user_data.email
-                request_data.insert_request()
-                device_data.insert_device()
-                req_audit_model.insert_request_audit()
-                device_audit_model.insert_device_audit()
-                return {"Message": "Request Approved"}, 201
-            return {"Message": "Request Not Found"}, 401
-        return {"Message": "Device is not requested"}, 401
+                admin_data = UserModel.find_by_id(json_data['admin_id'])
+                
+                if request_data and admin_data.role=="admin":
+                    request_data.reqStatus = "approved"
+                    device_data.status = "allocated"
+                    device_data.assignTo = user_data.email
+                    request_data.insert_request()
+                    device_data.insert_device()
+                    req_audit_model.insert_request_audit()
+                    device_audit_model.insert_device_audit()
+                    return {"Message": "Request Approved"}, 201
+                return {"Message": "Request Not Found"}, 401
+            return {"Message": "Device is not requested"}, 401
+        return {"Message": "Request Already Resolve"}, 403
+
 
 
 class DeclineRequest(Resource):
@@ -101,25 +104,27 @@ class DeclineRequest(Resource):
         json_data = request.get_json()
 
         request_data = RequestModel.find_by_id(reqId)
-        device_data = DeviceModel.find_by_id(request_data.deviceId)
-        user_data = UserModel.find_by_id(request_data.userId)
+        if request_data.reqStatus == "pending":
+            device_data = DeviceModel.find_by_id(request_data.deviceId)
+            user_data = UserModel.find_by_id(request_data.userId)
 
-        req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
-        req_audit_model = RequestAuditModel(**req_audit_obj)
+            req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+            req_audit_model = RequestAuditModel(**req_audit_obj)
 
-        admin_data = UserModel.find_by_id(json_data['admin_id'])
+            admin_data = UserModel.find_by_id(json_data['admin_id'])
 
-        if request_data and admin_data.role=="admin":
-            request_data.reqStatus = "declined"
-            device_data.status = "available"
-            device_data.assignTo = "0"
-            device_data.releaseDate = None
-            request_data.insert_request()
-            device_data.insert_device()
-            req_audit_model.insert_request_audit()
-            # declined request
-            return {"Message": "Request Declined Successfully"}, 201
-        return {"Message": "Request Not Found"}, 401
+            if request_data and admin_data.role=="admin":
+                request_data.reqStatus = "declined"
+                device_data.status = "available"
+                device_data.assignTo = "0"
+                device_data.releaseDate = None
+                request_data.insert_request()
+                device_data.insert_device()
+                req_audit_model.insert_request_audit()
+                # declined request
+                return {"Message": "Request Declined Successfully"}, 201
+            return {"Message": "Request Not Found"}, 401
+        return {"Message": "Request Already Resolve"}, 403
 
 
 class AllMyRequests(Resource):

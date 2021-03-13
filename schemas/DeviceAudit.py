@@ -10,9 +10,9 @@ class DeviceAuditSchema(Schema):
     id = fields.Int(dump_only=True)
     deviceId = fields.Int()
     userId = fields.Int()
-    allocateDate = fields.DateTime(dump_only=True)
+    allocateDate = fields.Str(dump_only=True)
     allocateBy = fields.Int()
-    deallocateDate = fields.DateTime(dump_only=True)
+    deallocateDate = fields.Str(dump_only=True)
     deallocateBy = fields.Int()
 
     device = fields.Nested(DeviceSchema)

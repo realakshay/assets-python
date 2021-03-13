@@ -51,6 +51,9 @@ class AssignDeviceToUser(Resource):
         json_data = request.get_json()
 
         device_data = DeviceModel.find_by_id(deviceId)
+
+        if device_data.status=="blocked" or device_data.status=="allocated":
+            return {"Message": "Device is not available"}, 401
         user_data = UserModel.find_by_id(userId)
 
         req_obj = {"deviceId": deviceId,"userId":userId}
@@ -74,7 +77,7 @@ class AssignDeviceToUser(Resource):
                     try:
                         device_data.insert_device()
                         request_model.insert_request()
-                        # return {"Message": "DEVICE ASSIGNED"}, 201
+                        return {"Message": "DEVICE ASSIGNED"}, 201
                     except:
                         return {"Message": "INTERNAL SERVER ERROR"}, 401
 
@@ -82,13 +85,13 @@ class AssignDeviceToUser(Resource):
                     req_audit_obj = {"reqId":req_model.reqId, "handleBy":json_data["admin_id"]}
                     req_audit_model = RequestAuditModel(**req_audit_obj)
 
-                    try:
-                        req_audit_model.insert_request_audit()
-                        device_audit_model.insert_device_audit()
-                        return {"Message": "DEVICE ASSIGNED"}, 201
+                    # try:
+                    req_audit_model.insert_request_audit()
+                    device_audit_model.insert_device_audit()
+                    return {"Message": "DEVICE ASSIGNED"}, 201
                         
-                    except:
-                        return {"Message": "INTERNAL SERVER ERROR"}, 403
+                    # except:
+                    #     return {"Message": "INTERNAL SERVER ERROR"}, 403
 
                     
                 # return {"Message": "DEVICE ALREADY ASSIGNED TO USER"}, 403
@@ -109,8 +112,9 @@ class DeallocateDevice(Resource):
             # device_data.isAvailable = True
             device_data.status = "available"
             device_data.assignTo = "0"
+            device_data.releaseDate = None
             device_audit.deallocateBy = json_data['admin_id']
-            device_audit.deallocateDate = date.today().strftime("%d/%m/%Y")
+            device_audit.deallocateDate = str(date.today().strftime("%d/%m/%Y"))
             try:
                 device_data.insert_device()
                 device_audit.insert_device_audit()

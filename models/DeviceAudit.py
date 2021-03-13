@@ -8,9 +8,9 @@ class DeviceAuditModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     deviceId = db.Column(db.Integer, db.ForeignKey("my_devices.id"), nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey("atos_users.id"), nullable=False)
-    allocateDate = db.Column(db.Date, default=date.today().strftime("%d/%m/%Y"))
+    allocateDate = db.Column(db.String(100), default=date.today().strftime("%d/%m/%Y"))
     allocateBy = db.Column(db.Integer, db.ForeignKey("atos_users.id"), nullable=False)
-    deallocateDate = db.Column(db.Date, default=None)
+    deallocateDate = db.Column(db.String(100), default=None)
     deallocateBy = db.Column(db.Integer, db.ForeignKey("atos_users.id"), default=None)
 
     device = db.relationship("DeviceModel")
@@ -25,7 +25,7 @@ class DeviceAuditModel(db.Model):
 
     @classmethod
     def find_my_device(cls, deviceId, userId):
-        return cls.query.filter((cls.deviceId==deviceId)&(cls.userId==userId)).order_by(cls.id).first()
+        return cls.query.filter((cls.deviceId==deviceId)&(cls.userId==userId)).order_by(db.desc(cls.id)).first()
     
     def insert_device_audit(self):
         db.session.add(self)

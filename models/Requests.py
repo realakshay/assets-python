@@ -6,7 +6,7 @@ class RequestModel(db.Model):
     __tablename__ = "requests"
 
     reqId = db.Column(db.Integer, primary_key=True)
-    reqDate = db.Column(db.Date, default=date.today().strftime("%d/%m/%Y"))
+    reqDate = db.Column(db.String(100), default=date.today().strftime("%d/%m/%Y"))
     deviceId = db.Column(db.Integer, db.ForeignKey("my_devices.id"), nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey("atos_users.id"), nullable=False)
     reqStatus = db.Column(db.String(100), default="pending")
@@ -41,4 +41,4 @@ class RequestModel(db.Model):
 
     @classmethod
     def get_my_last_request(cls, deviceId, userId):
-        return cls.query.filter((cls.deviceId==deviceId)&(cls.userId==userId)).order_by(cls.reqId).first()
+        return cls.query.filter((cls.deviceId==deviceId)&(cls.userId==userId)).order_by(db.desc(cls.reqId)).first()

@@ -10,7 +10,7 @@ class RequestAuditSchema(Schema):
     id = fields.Int(dump_only=True)
     reqId = fields.Int(dump_only=True)
     handleBy = fields.Int()
-    handleDate = fields.DateTime(dump_only=True)
+    handleDate = fields.Str(dump_only=True)
 
     request = fields.Nested(RequestSchema)
     requestHandler = fields.Nested(UserSchema(exclude=['password']))

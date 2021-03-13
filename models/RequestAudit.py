@@ -8,7 +8,7 @@ class RequestAuditModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reqId = db.Column(db.Integer, db.ForeignKey("requests.reqId"), nullable=False)
     handleBy = db.Column(db.Integer, db.ForeignKey("atos_users.id"), nullable=False)
-    handleDate = db.Column(db.Date, default=date.today().strftime("%d/%m/%Y"))
+    handleDate = db.Column(db.String(100), default=date.today().strftime("%d/%m/%Y"))
 
     request = db.relationship("RequestModel")
     requestHandler = db.relationship("UserModel")
