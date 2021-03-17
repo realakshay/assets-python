@@ -55,3 +55,7 @@ class DeviceModel(db.Model):
     def delete_device(self):
         db.session.delete(self)
         db.session.commit()
+
+    @classmethod
+    def activated_devices(cls):
+        return cls.query.filter_by(isActivated=True).all()

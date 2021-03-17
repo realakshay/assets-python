@@ -24,7 +24,8 @@ from resources.Device import (
     DeActivateDevice,
     SpecificDevice,
     AssignedDeviceList,
-    DeviceUpdate
+    DeviceUpdate,
+    ActivatedDevices
 )
 
 from resources.Requests import (
@@ -71,6 +72,7 @@ api.add_resource(DeActivateDevice, '/deactivate/<int:deviceId>')
 api.add_resource(SpecificDevice, '/getdevice/<int:deviceId>')
 api.add_resource(AssignedDeviceList, '/all/assigned')
 api.add_resource(DeviceUpdate, '/update/device/<int:deviceId>')
+api.add_resource(ActivatedDevices, '/devices/activated')
 
 
 # Request Session will goes here

@@ -185,3 +185,10 @@ class DeviceUpdate(Resource):
             device_data.insert_device()
             return {"Message": "Device Updated Successfully"}, 201
         return {"Message": "Internal server error"}, 401
+
+class ActivatedDevices(Resource):
+
+    @classmethod
+    def get(cls):
+        activated_devices = DeviceModel.activated_devices()
+        return DeviceSchema(many=True).dump(activated_devices), 201
