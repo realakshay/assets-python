@@ -1,5 +1,9 @@
 from flask import request, jsonify
 from flask_restful import Resource
+from flask_jwt_extended import (
+    get_jwt_identity, 
+    jwt_required
+)
 from marshmallow import ValidationError
 from models.Device import DeviceModel
 from models.User import UserModel
@@ -12,6 +16,7 @@ from datetime import date
 class DeviceInsert(Resource):
 
     @classmethod
+    @jwt_required
     def post(cls):
         json_data = request.get_json()
         
@@ -32,6 +37,7 @@ class DeviceInsert(Resource):
 class DeviceList(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         device_data = DeviceModel.find_all()
         return DeviceSchema(many=True).dump(device_data), 201
@@ -39,6 +45,7 @@ class DeviceList(Resource):
 class AvailableDeviceList(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         device_data = DeviceModel.find_available()
         return DeviceSchema(many=True).dump(device_data), 201
@@ -46,11 +53,13 @@ class AvailableDeviceList(Resource):
 class AssignDeviceToUser(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, deviceId, userId):
         
         json_data = request.get_json()
 
         device_data = DeviceModel.find_by_id(deviceId)
+        admin_id = get_jwt_identity()
 
         if device_data.status=="blocked" or device_data.status=="allocated":
             return {"Message": "Device is not available"}, 401
@@ -59,10 +68,10 @@ class AssignDeviceToUser(Resource):
         req_obj = {"deviceId": deviceId,"userId":userId}
         request_model = RequestModel(**req_obj)
 
-        device_obj = {"deviceId": deviceId,"userId":userId, "allocateBy": json_data["admin_id"]}
+        device_obj = {"deviceId": deviceId,"userId":userId, "allocateBy": admin_id}
         device_audit_model = DeviceAuditModel(**device_obj)
 
-        admin_data = UserModel.find_by_id(json_data['admin_id'])
+        admin_data = UserModel.find_by_id(admin_id)
 
         if device_data and user_data and admin_data.role=="admin":
             # if device_data.status == "created" or device_data.status == "available" :
@@ -82,7 +91,7 @@ class AssignDeviceToUser(Resource):
                         return {"Message": "INTERNAL SERVER ERROR"}, 401
 
                     req_model = RequestModel.get_my_last_request(deviceId, userId)
-                    req_audit_obj = {"reqId":req_model.reqId, "handleBy":json_data["admin_id"]}
+                    req_audit_obj = {"reqId":req_model.reqId, "handleBy":admin_id}
                     req_audit_model = RequestAuditModel(**req_audit_obj)
 
                     # try:
@@ -103,17 +112,21 @@ class AssignDeviceToUser(Resource):
 class DeallocateDevice(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, deviceId):
-        json_data = request.get_json()
+ 
         device_data = DeviceModel.find_by_id(deviceId)
         user_data = UserModel.find_by_email(device_data.assignTo)
         device_audit = DeviceAuditModel.find_my_device(deviceId, user_data.id)
+        admin_id = get_jwt_identity()
+        if device_data.assignTo=="0":
+            return {"Message": "Device Not Allocated"}, 403
         if device_data and device_audit:
             # device_data.isAvailable = True
             device_data.status = "available"
             device_data.assignTo = "0"
             device_data.releaseDate = None
-            device_audit.deallocateBy = json_data['admin_id']
+            device_audit.deallocateBy = admin_id
             device_audit.deallocateDate = str(date.today().strftime("%d/%m/%Y"))
             try:
                 device_data.insert_device()
@@ -128,6 +141,7 @@ class DeallocateDevice(Resource):
 class ActivateDevice(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, deviceId):
         device_data = DeviceModel.find_by_id(deviceId)
         if device_data:
@@ -143,6 +157,7 @@ class ActivateDevice(Resource):
 class DeActivateDevice(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, deviceId):
         device_data = DeviceModel.find_by_id(deviceId)
         if device_data:
@@ -160,6 +175,7 @@ class DeActivateDevice(Resource):
 class SpecificDevice(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls, deviceId):
         device_data = DeviceModel.find_by_id(deviceId)
         return DeviceSchema().dump(device_data), 201
@@ -168,6 +184,7 @@ class SpecificDevice(Resource):
 class AssignedDeviceList(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         assigned_devices = DeviceModel.find_assigned()
         return DeviceSchema(many=True).dump(assigned_devices), 201
@@ -176,6 +193,7 @@ class AssignedDeviceList(Resource):
 class DeviceUpdate(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, deviceId):
         json_data = request.get_json()
         device_data = DeviceModel.find_by_id(deviceId)
@@ -189,6 +207,7 @@ class DeviceUpdate(Resource):
 class ActivatedDevices(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         activated_devices = DeviceModel.activated_devices()
         return DeviceSchema(many=True).dump(activated_devices), 201

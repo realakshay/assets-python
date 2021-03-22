@@ -4,6 +4,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
 from resources.User import (
     UserResource, 
     UserLogin, 
@@ -37,16 +38,17 @@ from resources.Requests import (
 )
 
 from resources.RequestAudit import AllRequsetAudits
-
 from resources.DeviceAudit import AllDeviceAudits
 
 load_dotenv('.env')
 
 app = Flask(__name__)
 app.secret_key = os.getenv('APP_SECRET_KEY')
-CORS(app)
 
+CORS(app)
+JWTManager(app)
 api = Api(app)
+
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
@@ -57,14 +59,13 @@ def create_tables():
     db.create_all()
 
 @app.route('/')
-def method_name():
+def home():
     return "<h1>App is running now</h1>"
-
 
 api.add_resource(DeviceInsert, '/device/insert')
 api.add_resource(DeviceList, '/devices')
 api.add_resource(AvailableDeviceList, '/device/available')
-api.add_resource(UsersDevices, '/mydevices/<int:id>')
+api.add_resource(UsersDevices, '/mydevices')
 api.add_resource(AssignDeviceToUser, '/assign/<int:deviceId>/<int:userId>')
 api.add_resource(DeallocateDevice, '/deallocate/<int:deviceId>')
 api.add_resource(ActivateDevice, '/activate/<int:deviceId>')
@@ -81,7 +82,7 @@ api.add_resource(RegisterRequest, "/insert/request")
 api.add_resource(AllPendingRequests, "/requests/pending")
 api.add_resource(ApproveRequest, "/request/approve/<int:reqId>")
 api.add_resource(DeclineRequest, "/request/decline/<int:reqId>")
-api.add_resource(AllMyRequests, "/myrequests/<int:userId>")
+api.add_resource(AllMyRequests, "/myrequests")
 
 
 # Request Audits goes here

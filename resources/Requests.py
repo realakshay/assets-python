@@ -1,5 +1,9 @@
 from flask import request, jsonify
 from flask_restful import Resource
+from flask_jwt_extended import (
+    get_jwt_identity, 
+    jwt_required
+)
 from marshmallow import ValidationError
 from models.Requests import RequestModel
 from schemas.Requests import RequestSchema
@@ -16,9 +20,11 @@ requests_schema = RequestSchema(many=True)
 class RegisterRequest(Resource):
 
     @classmethod
+    @jwt_required
     def post(cls):
         json_data = request.get_json()
-        user = UserModel.find_by_id(json_data["userId"])
+        user_id = get_jwt_identity()
+        user = UserModel.find_by_id(user_id)
         device = DeviceModel.find_by_id(json_data["deviceId"])
 
         print(json_data["releaseDate"])
@@ -28,7 +34,7 @@ class RegisterRequest(Resource):
                 if device.isActivated :
                     if device.status=="created" or device.status=="available":
                         try:
-                            req_obj = {"deviceId" : json_data["deviceId"], "userId" : json_data["userId"]}
+                            req_obj = {"deviceId" : json_data["deviceId"], "userId" : user.id}
                             request_data = request_schema.load(req_obj)
                         except ValidationError as err:
                             return err.messages, 401
@@ -51,6 +57,7 @@ class RegisterRequest(Resource):
 class AllPendingRequests(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         pending_requests = RequestModel.find_pending()
         return requests_schema.dump(pending_requests), 201
@@ -59,27 +66,28 @@ class AllPendingRequests(Resource):
 class ApproveRequest(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, reqId):
 
-        json_data = request.get_json()
-
+        
+        admin_id = get_jwt_identity()
         request_data = RequestModel.find_by_id(reqId)
         device_data = DeviceModel.find_by_id(request_data.deviceId)
 
         if request_data.reqStatus == "pending":
             if device_data.status=="blocked":
                 user_data = UserModel.find_by_id(request_data.userId)
-                req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+                req_audit_obj = {"reqId":reqId, "handleBy": admin_id}
                 req_audit_model = RequestAuditModel(**req_audit_obj)
 
                 device_obj = {
                     "deviceId": request_data.deviceId,
                     "userId": request_data.userId, 
-                    "allocateBy": json_data["admin_id"]
+                    "allocateBy": admin_id
                 }
                 device_audit_model = DeviceAuditModel(**device_obj)
 
-                admin_data = UserModel.find_by_id(json_data['admin_id'])
+                admin_data = UserModel.find_by_id(admin_id)
                 
                 if request_data and admin_data.role=="admin":
                     request_data.reqStatus = "approved"
@@ -99,19 +107,20 @@ class ApproveRequest(Resource):
 class DeclineRequest(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, reqId):
 
-        json_data = request.get_json()
-
+        
+        admin_id = get_jwt_identity()
         request_data = RequestModel.find_by_id(reqId)
         if request_data.reqStatus == "pending":
             device_data = DeviceModel.find_by_id(request_data.deviceId)
             user_data = UserModel.find_by_id(request_data.userId)
 
-            req_audit_obj = {"reqId":reqId, "handleBy":json_data["admin_id"]}
+            req_audit_obj = {"reqId":reqId, "handleBy":admin_id}
             req_audit_model = RequestAuditModel(**req_audit_obj)
 
-            admin_data = UserModel.find_by_id(json_data['admin_id'])
+            admin_data = UserModel.find_by_id(admin_id)
 
             if request_data and admin_data.role=="admin":
                 request_data.reqStatus = "declined"
@@ -130,6 +139,8 @@ class DeclineRequest(Resource):
 class AllMyRequests(Resource):
 
     @classmethod
-    def get(cls, userId):
-        my_requests = RequestModel.find_my_requests(userId)
+    @jwt_required
+    def get(cls):
+        user_id = get_jwt_identity()
+        my_requests = RequestModel.find_my_requests(user_id)
         return requests_schema.dump(my_requests), 201

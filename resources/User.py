@@ -1,6 +1,14 @@
 from flask import request, jsonify
 from flask_restful import Resource
+from flask_jwt_extended import (
+    create_access_token, 
+    create_refresh_token, 
+    get_jwt_identity, 
+    jwt_required,
+    get_raw_jwt
+)
 from marshmallow import ValidationError
+from werkzeug.security import check_password_hash, generate_password_hash
 from models.User import UserModel
 from schemas.User import UserSchema
 from models.Device import DeviceModel
@@ -17,15 +25,9 @@ class UserResource(Resource):
         user = UserModel.find_by_email(json_data['email'])
         if user:
             return {"Message": "User with this email is already register"}, 401
-            
-        # personal_info = {
-        #     "username" : json_data["username"],
-        #     "password" : json_data["password"],
-        #     "email" : json_data["email"],
-        #     "role": json_data["role"],
-        #     "firstName": json_data["firstName"],
-        #     "lastName": json_data["lastName"]
-        # }
+
+        pwd = generate_password_hash(json_data['password'])
+        json_data['password'] = pwd
 
         try:
             user_data = UserSchema().load(json_data)
@@ -53,8 +55,12 @@ class UserLogin(Resource):
         data = UserModel.find_by_username(json_data['username'])
         if data :
             if data.isActivated:
-                if data.password == json_data['password']:
-                    return { "Message": "LOGIN_SUCCESS", "role": data.role, "id":data.id, "firstName": data.firstName}, 201
+                if check_password_hash(data.password, json_data['password']):
+                # if data.password == json_data['password']:
+                    access_token = create_access_token(identity=data.id, fresh=True)
+                    user_data = {"role": data.role, "id":data.id, "firstName": data.firstName}
+                    return { 
+                        "Message": "LOGIN_SUCCESS", "data": user_data, "access_token":access_token}, 201
                 else :
                     return {"Message" : "INCORRECT_PASSWORD"}, 403
             return {"Message" : "USER_NOT_ACTIVATED_YET"}, 401
@@ -64,7 +70,9 @@ class UserLogin(Resource):
 class UsersDevices(Resource):
 
     @classmethod
-    def get(cls, id : int):
+    @jwt_required
+    def get(cls):
+        id = get_jwt_identity()
         my_devices = DeviceModel.find_my_devices(id)
         return DeviceSchema(many=True).dump(my_devices), 201
 
@@ -72,6 +80,7 @@ class UsersDevices(Resource):
 class AllUsers(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         user_data = UserModel.find_all()
         return UserSchema(many=True, exclude=['password']).dump(user_data), 201
@@ -80,6 +89,7 @@ class AllUsers(Resource):
 class AllActivatedUsers(Resource):
 
     @classmethod
+    @jwt_required
     def get(cls):
         activated_user_data = UserModel.find_all_activated()
         return UserSchema(many=True, exclude=['password']).dump(activated_user_data), 201
@@ -87,11 +97,13 @@ class AllActivatedUsers(Resource):
 class ActivateUser(Resource):
 
     @classmethod
+    @jwt_required
     def post(cls, userId):
-        json_data = request.get_json()
+    
 
         user_data = UserModel.find_by_id(userId)
-        admin_data = UserModel.find_by_id(json_data['admin_id'])
+        admin_id = get_jwt_identity()
+        admin_data = UserModel.find_by_id(admin_id)
 
         if user_data:
             if admin_data:
@@ -109,11 +121,13 @@ class ActivateUser(Resource):
 class DeActivateUser(Resource):
 
     @classmethod
+    @jwt_required
     def post(cls, userId):
-        json_data = request.get_json()
+
 
         user_data = UserModel.find_by_id(userId)
-        admin_data = UserModel.find_by_id(json_data['admin_id'])
+        admin_id = get_jwt_identity()
+        admin_data = UserModel.find_by_id(admin_id)
         user_devices = DeviceModel.find_my_devices(userId)
         type(user_devices)
         print(len(user_devices))
@@ -135,6 +149,7 @@ class DeActivateUser(Resource):
 class EditUser(Resource):
 
     @classmethod
+    @jwt_required
     def put(cls, userId):
         json_data = request.get_json()
         user_data = UserModel.find_by_id(userId)
