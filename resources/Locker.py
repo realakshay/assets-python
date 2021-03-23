@@ -33,3 +33,55 @@ class Locker(Resource):
             return {"Message": "Locker Inserted"}, 201
         except:
             return {"Message": "Error While Insertion"}, 401
+
+class ActivatedLocker(Resource):
+    
+    @classmethod
+    @jwt_required
+    def get(cls):
+        activated_lockers = LockerModel.find_activated()
+        return LockerSchema(many=True).dump(activated_lockers), 201
+
+
+class ActivateLocker(Resource):
+
+    @classmethod
+    @jwt_required
+    def put(cls, lockerId):
+        locker_data = LockerModel.find_by_id(lockerId)
+
+        if not locker_data:
+            return {"Message": "Locker not found"}, 401
+
+        if locker_data.isActivated:
+            return {"Message": "Locker is already activated"}, 401
+        locker_data.isActivated = True
+        try:
+            locker_data.insert_locker()
+            return {"Message": "Locker activated successful"}, 201
+        except:
+            return {"Message": "Internal server error"}, 401
+
+
+class DeActivateLocker(Resource):
+
+    @classmethod
+    @jwt_required
+    def put(cls, lockerId):
+        locker_data = LockerModel.find_by_id(lockerId)
+
+        if not locker_data:
+            return {"Message": "Locker not found"}, 401
+
+        if not locker_data.isActivated:
+            return {"Message": "Locker is already deactivated"}, 401
+
+        jumble_data = LockerSchema().dump(locker_data)
+        if len(jumble_data['devices'])>0:
+            return {"Message": "This locker holds some devices"}, 401
+        locker_data.isActivated = False
+        try:
+            locker_data.insert_locker()
+            return {"Message": "Locker de-activated successful"}, 201
+        except:
+            return {"Message": "Internal server error"}, 401

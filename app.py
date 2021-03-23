@@ -40,7 +40,7 @@ from resources.Requests import (
 from resources.RequestAudit import AllRequsetAudits
 from resources.DeviceAudit import AllDeviceAudits
 
-from resources.Locker import Locker
+from resources.Locker import Locker, ActivatedLocker, ActivateLocker, DeActivateLocker
 
 load_dotenv('.env')
 
@@ -103,7 +103,11 @@ api.add_resource(AllUsers, '/allusers')
 api.add_resource(EditUser, "/user/edit/<int:userId>")
 
 
+# Locker requests
 api.add_resource(Locker, "/locker")
+api.add_resource(ActivatedLocker, "/locker/activated")
+api.add_resource(ActivateLocker, "/locker/activate/<int:lockerId>")
+api.add_resource(DeActivateLocker, "/locker/deactivate/<int:lockerId>")
 
 if __name__ == "__main__":
     from db import db

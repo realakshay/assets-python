@@ -10,6 +10,7 @@ from models.User import UserModel
 from models.Requests import RequestModel
 from models.RequestAudit import RequestAuditModel
 from models.DeviceAudit import DeviceAuditModel
+from models.Locker import LockerModel
 from schemas.Device import DeviceSchema
 from datetime import date
 
@@ -19,7 +20,9 @@ class DeviceInsert(Resource):
     @jwt_required
     def post(cls):
         json_data = request.get_json()
-        
+        locker_data = LockerModel.find_by_id(json_data['locker_id'])
+        if not locker_data.isActivated:
+            return {"Message": "Locker is not activate yet"}, 401
         try:
             device_data = DeviceSchema().load(json_data)
             print(device_data)
@@ -77,8 +80,7 @@ class AssignDeviceToUser(Resource):
             # if device_data.status == "created" or device_data.status == "available" :
             if user_data.isActivated:
                 if device_data.isActivated :
-                    # device_data.isAvailable = False
-                    # if user_data.role == "admin":
+
                     request_model.reqStatus = "approved"
                     device_data.status = "allocated"
                     device_data.assignTo = user_data.email
@@ -94,16 +96,10 @@ class AssignDeviceToUser(Resource):
                     req_audit_obj = {"reqId":req_model.reqId, "handleBy":admin_id}
                     req_audit_model = RequestAuditModel(**req_audit_obj)
 
-                    # try:
                     req_audit_model.insert_request_audit()
                     device_audit_model.insert_device_audit()
                     return {"Message": "DEVICE ASSIGNED"}, 201
-                        
-                    # except:
-                    #     return {"Message": "INTERNAL SERVER ERROR"}, 403
 
-                    
-                # return {"Message": "DEVICE ALREADY ASSIGNED TO USER"}, 403
                 return {"Message": "DEVICE IS NOT ACTIVATED TO ASSIGN"}, 400
             return {"Message": "USER IS NOT ACTIVATED TO ASSIGN"}, 400
         return {"MESSAGE": "INVALID REQUEST"}, 400
@@ -116,9 +112,17 @@ class DeallocateDevice(Resource):
     def put(cls, deviceId):
  
         device_data = DeviceModel.find_by_id(deviceId)
+
+        if not device_data:
+            return {"Message": "Device Not found"}, 401
+
+        if device_data.assignTo == "0":
+            return {"Message": "Device is not allocated"}, 401
+
         user_data = UserModel.find_by_email(device_data.assignTo)
         device_audit = DeviceAuditModel.find_my_device(deviceId, user_data.id)
         admin_id = get_jwt_identity()
+
         if device_data.assignTo=="0":
             return {"Message": "Device Not Allocated"}, 403
         if device_data and device_audit:

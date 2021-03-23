@@ -7,6 +7,7 @@ class LockerModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200), nullable=False)
+    isActivated = db.Column(db.Boolean, default=False)
 
     devices = db.relationship('DeviceModel', lazy="dynamic")
 
@@ -17,6 +18,10 @@ class LockerModel(db.Model):
     @classmethod
     def find_all_locker(cls):
         return cls.query.all()
+
+    @classmethod
+    def find_activated(cls):
+        return cls.query.filter_by(isActivated=True).all()
 
     def insert_locker(self):
         db.session.add(self)

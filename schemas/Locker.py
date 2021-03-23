@@ -9,4 +9,5 @@ class LockerSchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str()
     description = fields.Str()
+    isActivated = fields.Bool()
     devices = fields.Nested(DeviceSchema(many=True))
