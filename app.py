@@ -45,6 +45,7 @@ from resources.Locker import Locker, ActivatedLocker, ActivateLocker, DeActivate
 load_dotenv('.env')
 
 app = Flask(__name__)
+
 app.secret_key = os.getenv('APP_SECRET_KEY')
 CORS(app)
 JWTManager(app)
