@@ -19,3 +19,5 @@ class DeviceSchema(Schema):
     releaseDate = fields.Str(dump_only=True)
     assignTo = fields.Str()
     status = fields.Str()
+
+    locker_id = fields.Int()

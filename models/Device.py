@@ -21,6 +21,9 @@ class DeviceModel(db.Model):
     # status could be created, allocated, available, blocked
     status = db.Column(db.String(100), default="created")
 
+    locker_id = db.Column(db.Integer, db.ForeignKey("locker.id"), nullable=False)
+    locker = db.relationship('LockerModel')
+
     requests=db.relationship('RequestModel',lazy='dynamic')
     
     @classmethod

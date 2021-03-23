@@ -40,6 +40,8 @@ from resources.Requests import (
 from resources.RequestAudit import AllRequsetAudits
 from resources.DeviceAudit import AllDeviceAudits
 
+from resources.Locker import Locker
+
 load_dotenv('.env')
 
 app = Flask(__name__)
@@ -99,6 +101,9 @@ api.add_resource(UserResource, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(AllUsers, '/allusers')
 api.add_resource(EditUser, "/user/edit/<int:userId>")
+
+
+api.add_resource(Locker, "/locker")
 
 if __name__ == "__main__":
     from db import db
