@@ -58,9 +58,9 @@ class UserLogin(Resource):
                 if check_password_hash(data.password, json_data['password']):
                 # if data.password == json_data['password']:
                     access_token = create_access_token(identity=data.id, fresh=True)
+                    refresh_token = create_refresh_token(data.id)
                     user_data = {"role": data.role, "id":data.id, "firstName": data.firstName}
-                    return { 
-                        "Message": "LOGIN_SUCCESS", "data": user_data, "access_token":access_token}, 201
+                    return {"Message": "LOGIN_SUCCESS", "data": user_data, "access_token":access_token}, 201
                 else :
                     return {"Message" : "INCORRECT_PASSWORD"}, 403
             return {"Message" : "USER_NOT_ACTIVATED_YET"}, 401

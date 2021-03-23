@@ -46,11 +46,11 @@ load_dotenv('.env')
 
 app = Flask(__name__)
 app.secret_key = os.getenv('APP_SECRET_KEY')
-
 CORS(app)
 JWTManager(app)
 api = Api(app)
 
+app.config['SECRET_KEY'] = 'GDtfDCFYjDflaldkjsklfjlksjlfkjkaljkljlkfdjkalfdjklajsf'
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
