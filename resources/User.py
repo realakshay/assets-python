@@ -59,7 +59,6 @@ class UserLogin(Resource):
                 # if data.password == json_data['password']:
                     access_token = create_access_token(identity=data.id, fresh=True)
                     refresh_token = create_refresh_token(data.id)
-                    print(access_token)
                     user_data = {"role": data.role, "id":data.id, "firstName": data.firstName}
                     return {"Message": "LOGIN_SUCCESS", "data": user_data, "access_token":access_token}, 201
                 else :
