@@ -13,6 +13,7 @@ from models.User import UserModel
 from schemas.User import UserSchema
 from models.Device import DeviceModel
 from schemas.Device import DeviceSchema
+import datetime
 
 
 class UserResource(Resource):
@@ -57,7 +58,8 @@ class UserLogin(Resource):
             if data.isActivated:
                 if check_password_hash(data.password, json_data['password']):
                 # if data.password == json_data['password']:
-                    access_token = create_access_token(identity=data.id, fresh=True)
+                    expires = datetime.timedelta(days=365)
+                    access_token = create_access_token(identity=data.id, fresh=True, expires_delta=expires)
                     refresh_token = create_refresh_token(data.id)
                     user_data = {"role": data.role, "id":data.id, "firstName": data.firstName}
                     return {"Message": "LOGIN_SUCCESS", "data": user_data, "access_token":access_token}, 201
