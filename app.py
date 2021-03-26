@@ -40,7 +40,7 @@ from resources.Requests import (
 from resources.RequestAudit import AllRequsetAudits
 from resources.DeviceAudit import AllDeviceAudits
 
-from resources.Locker import Locker, ActivatedLocker, ActivateLocker, DeActivateLocker
+from resources.Locker import Locker, ActivatedLocker, ActivateLocker, DeActivateLocker, EditLocker
 
 load_dotenv('.env')
 
@@ -51,7 +51,7 @@ CORS(app)
 JWTManager(app)
 api = Api(app)
 
-app.config['SECRET_KEY'] = 'GDtfDCFYjDflaldkjsklfjlksjlfkjkaljkljlkfdjkalfdjklajsf'
+app.config['SECRET_KEY'] =os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
@@ -109,6 +109,7 @@ api.add_resource(Locker, "/locker")
 api.add_resource(ActivatedLocker, "/locker/activated")
 api.add_resource(ActivateLocker, "/locker/activate/<int:lockerId>")
 api.add_resource(DeActivateLocker, "/locker/deactivate/<int:lockerId>")
+api.add_resource(EditLocker, "/locker/edit/<int:lockerId>")
 
 if __name__ == "__main__":
     from db import db

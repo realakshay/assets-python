@@ -85,3 +85,18 @@ class DeActivateLocker(Resource):
             return {"Message": "Locker de-activated successful"}, 201
         except:
             return {"Message": "Internal server error"}, 401
+
+
+class EditLocker(Resource):
+
+    @classmethod
+    @jwt_required
+    def put(cls, lockerId):
+        json_data = request.get_json()
+        locker_data = LockerModel.find_by_id(lockerId)
+        if not locker_data:
+            return {"Message": "Locker with this id not found"}, 401
+        locker_data.name = json_data['name']
+        locker_data.description = json_data['description']
+        locker_data.insert_locker()
+        return {"Message": "Locker updated"}, 201
